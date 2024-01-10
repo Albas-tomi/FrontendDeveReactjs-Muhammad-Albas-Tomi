@@ -1,9 +1,42 @@
 # React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 # FrontendDeveReactjs-Muhammad-Albas-Tomi
+# Nama-Proyek
+
+Deskripsi singkat tentang proyek ini.
+
+## Versi Node.js
+
+Versi Node.js yang digunakan dalam proyek ini adalah `v18.17.0`.
+
+## Versi Vite
+
+Proyek ini menggunakan Vite sebagai bundler dengan versi `v5.0.8`.
+
+## Pengguna Dummy
+
+Gunakan pengguna dummy berikut untuk masuk:
+
+- **Username:** albas
+- **Password:** password123
+- **Email:** albas@gmail.com
+
+## Langkah Installasi
+
+1. Clone atau download proyek ini.
+2. Buka dalam Visual Studio Code atau editor kode lainnya.
+3. Buka terminal dan jalankan perintah:
+
+    ```bash
+    npm install
+    ```
+
+4. Setelah instalasi selesai, jalankan proyek dengan perintah:
+
+    ```bash
+    npm run dev
+    ```
+
+## Catatan Penting
+
+Pastikan Node.js dan npm sudah terinstal di komputer Anda sebelum menjalankan langkah-langkah di atas.
+
