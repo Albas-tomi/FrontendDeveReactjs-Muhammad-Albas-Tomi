@@ -1,14 +1,18 @@
 import { Button, Navbar } from "flowbite-react";
 import { Link, useNavigate } from "react-router-dom";
+import ModalConfirmLogout from "./ModalConfirmLogout";
+import { useState } from "react";
 
 const NavigationBar = () => {
+  const [openModal, setOpenModal] = useState(false);
+
   const userLogin = localStorage.getItem("userLogin");
   const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("userLogin");
-    alert("Berhasil Logout");
     navigate("/");
+    window.location.reload();
   };
   return (
     <Navbar fluid rounded>
@@ -24,7 +28,13 @@ const NavigationBar = () => {
             <Button>Login</Button>
           </Link>
         ) : (
-          <Button onClick={handleLogout}>Logout</Button>
+          <Button
+            onClick={() => {
+              setOpenModal(true);
+            }}
+          >
+            Logout
+          </Button>
         )}
 
         <Navbar.Toggle />
@@ -44,6 +54,11 @@ const NavigationBar = () => {
           Contact
         </Navbar.Link>
       </Navbar.Collapse>
+      <ModalConfirmLogout
+        handleLogout={handleLogout}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+      />
     </Navbar>
   );
 };
