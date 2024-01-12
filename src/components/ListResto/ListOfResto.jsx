@@ -13,7 +13,6 @@ const ListOfResto = () => {
   const [visiblieCard, setVisibleCard] = useState(4);
   const [selectedFilter, setSelectedFilter] = useState("");
   const [isOpenCloseFilter, setIsOpenCloseFilter] = useState(false);
-
   const userLogin = localStorage.getItem("userLogin");
 
   //   Server Side Exp
@@ -39,6 +38,7 @@ const ListOfResto = () => {
       setLoading(false);
     }
   };
+
   //   GET DATA SERVER SIDE
   const getDataRestoBy = async (id) => {
     try {
@@ -71,7 +71,10 @@ const ListOfResto = () => {
     if (selectedFilter === "") {
       return data;
     } else {
-      return data.filter((restoData) => restoData.price === selectedFilter);
+      return data.filter((restoData) => {
+        // jika harga tersedia pada
+        return selectedFilter.includes(restoData.price);
+      });
     }
   };
 
@@ -107,6 +110,12 @@ const ListOfResto = () => {
     new Set([...filteredDataByPrice, ...filteredDataByCategory])
   ); //   DATA FILTER ==
 
+  const handleClearFilter = () => {
+    setSelectedFilter("");
+    setIsOpenCloseFilter(false);
+    setIdSelected("");
+  };
+
   if (loading)
     return (
       <div className="w-full text-center h-screen">
@@ -120,7 +129,6 @@ const ListOfResto = () => {
   return (
     <section className="p-4 ">
       <div className="flex gap-4 items-center">
-        {/* Logic Serverside */}
         {/* Logic Serverside */}
         <div className="flex shadow-sm my-2 w-screen  py-2 border-t-0 border-gray-500 flex-col md:flex-row justify-start md:justify-center md:items-center gap-2">
           <div className="flex gap-2 rounded-sm md:justify-center md:items-center">
@@ -153,6 +161,7 @@ const ListOfResto = () => {
             selectedFilter={selectedFilter}
             dataResto={dataResto}
           />
+          <button onClick={handleClearFilter}>Clear All</button>
         </div>
       </div>
       <div>
@@ -202,7 +211,7 @@ const ListOfResto = () => {
           </Button>
         ) : (
           <Link to={"/login"}>
-            <Button>
+            <Button className="mx-auto">
               Load more
               <svg
                 className="-mr-1 ml-2 h-4 w-4"
