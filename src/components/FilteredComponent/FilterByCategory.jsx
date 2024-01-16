@@ -1,12 +1,16 @@
 import React from "react";
 
-const FilterByCategory = ({ setSelectedFilter, selectedFilter, dataResto }) => {
+const FilterByCategory = ({
+  setSelectedFilterByCategory,
+  selectedFilterByCategory,
+  dataResto,
+}) => {
   return (
     <div className="flex gap-2 rounded-sm md:justify-center items-center">
       <select
-        id="filterByPrice"
-        onChange={(e) => setSelectedFilter(e.target.value)}
-        value={selectedFilter}
+        id="filterByCategory"
+        onChange={(e) => setSelectedFilterByCategory(e.target.value)}
+        value={selectedFilterByCategory}
       >
         <option value="">category</option>
         {dataResto.map((data) => (

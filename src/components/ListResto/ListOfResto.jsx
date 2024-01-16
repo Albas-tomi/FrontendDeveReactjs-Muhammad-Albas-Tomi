@@ -9,10 +9,24 @@ import { Link } from "react-router-dom";
 
 const ListOfResto = () => {
   const [dataResto, setDataResto] = useState([]);
+  const [dataFilter, setDataFilter] = useState([]);
   const [loading, setLoading] = useState(false);
   const [visiblieCard, setVisibleCard] = useState(4);
-  const [selectedFilter, setSelectedFilter] = useState("");
+
+  // Category
+  const [selectedFilterByCategory, setSelectedFilterByCategory] = useState("");
+  // Category
+
+  // Open Resto
   const [isOpenCloseFilter, setIsOpenCloseFilter] = useState(false);
+  // Open Resto
+
+  // Filter By price
+  const [rangePriceFilter, setRangePriceFilter] = useState("");
+  const [minPrice, setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
+  // Filter By price
+
   const userLogin = localStorage.getItem("userLogin");
 
   //   Server Side Exp
@@ -22,6 +36,67 @@ const ListOfResto = () => {
 
   const handleLoadMore = () => {
     setVisibleCard((prevValue) => prevValue + 4);
+  };
+
+  const handleRangePrice = (data) => {
+    if (data.includes("100.00 - 200.00")) {
+      setMinPrice(100);
+      setMaxPrice(200);
+    } else if (data.includes("200.00 - 300.00")) {
+      setMinPrice(200);
+      setMaxPrice(300);
+    } else if (data.includes("300.00 - 400.00")) {
+      setMinPrice(300);
+      setMaxPrice(400);
+    } else if (data.includes("400.00 - 500.00")) {
+      setMinPrice(400);
+      setMaxPrice(500);
+    } else if (data.includes("500.00 - 600.00")) {
+      setMinPrice(500);
+      setMaxPrice(600);
+    } else if (data.includes("600.00 - 700.00")) {
+      setMinPrice(600);
+      setMaxPrice(700);
+    } else if (data.includes("700.00 - 800.00")) {
+      setMinPrice(700);
+      setMaxPrice(800);
+    } else if (data.includes("800.00 - 900.00")) {
+      setMinPrice(800);
+      setMaxPrice(900);
+    } else if (data.includes("900.00 - 1000.00")) {
+      setMinPrice(900);
+      setMaxPrice(1000);
+    } else {
+      setMinPrice(null);
+      setMaxPrice(null);
+    }
+    setRangePriceFilter(data);
+  };
+
+  const handleFilteredData = () => {
+    let dataDisplay = dataResto;
+    if (isOpenCloseFilter === true) {
+      dataDisplay = dataDisplay.filter(
+        (restoData) => restoData.isOpen === isOpenCloseFilter
+      );
+    }
+    if (selectedFilterByCategory) {
+      dataDisplay = dataDisplay.filter(
+        (data) => data.kategori === selectedFilterByCategory
+      );
+    }
+    if (minPrice !== null) {
+      dataDisplay = dataDisplay.filter(
+        (dataPrice) =>
+          parseFloat(dataPrice.price) >= minPrice &&
+          parseFloat(dataPrice.price) <= maxPrice
+      );
+    }
+    if (idSelected !== "") {
+      dataDisplay = dataRestoBy;
+    }
+
+    setDataFilter(dataDisplay);
   };
 
   //   GET DATA
@@ -54,6 +129,7 @@ const ListOfResto = () => {
     }
   };
 
+  //   GET DATA SERVER SIDE
   useEffect(() => {
     if (idSelected !== "") getDataRestoBy(idSelected);
   }, [idSelected]);
@@ -63,57 +139,26 @@ const ListOfResto = () => {
     getDataResto();
   }, []);
 
-  //   Filter Data By Price
-  const filterDataByPrice = (data) => {
-    if (!Array.isArray(data)) {
-      return [];
-    }
-    if (selectedFilter === "") {
-      return data;
-    } else {
-      return data.filter((restoData) => {
-        // jika harga tersedia pada
-        return selectedFilter.includes(restoData.price);
-      });
-    }
-  };
+  useEffect(() => {
+    handleFilteredData();
+  }, [
+    selectedFilterByCategory,
+    isOpenCloseFilter,
+    dataResto,
+    minPrice,
+    maxPrice,
+    idSelected,
+    rangePriceFilter,
+  ]);
 
-  //   Filter Data By Price Client Side
-  const filterDataByCategory = (data) => {
-    if (!Array.isArray(data)) {
-      return [];
-    }
-    if (selectedFilter === "") {
-      return data;
-    } else {
-      return data.filter((restoData) => restoData.kategori === selectedFilter);
-    }
-  };
-
-  //   FILTER BY OPEN RESTO
-  const filterDataByOpenStatus = (data) => {
-    if (!isOpenCloseFilter) {
-      return "";
-    } else {
-      return data.filter((restoData) => restoData.isOpen === isOpenCloseFilter);
-    }
-  };
-
-  //   == DATA FILTER ==
-  const filteredDataByPrice = filterDataByPrice(dataResto);
-  const filteredDataByCategory = filterDataByCategory(dataResto);
-  const filteredDataByOpen = filterDataByOpenStatus(dataResto);
-  //   == DATA FILTER ==
-
-  //   DATA FILTER COMPARE ==
-  const allDataResto = Array.from(
-    new Set([...filteredDataByPrice, ...filteredDataByCategory])
-  ); //   DATA FILTER ==
-
+  // Reset All Filter
   const handleClearFilter = () => {
-    setSelectedFilter("");
+    setSelectedFilterByCategory("");
     setIsOpenCloseFilter(false);
     setIdSelected("");
+    setRangePriceFilter("");
+    setMinPrice(null);
+    setMaxPrice(null);
   };
 
   if (loading)
@@ -133,12 +178,12 @@ const ListOfResto = () => {
         <div className="flex shadow-sm my-2 w-screen  py-2 border-t-0 border-gray-500 flex-col md:flex-row justify-start md:justify-center md:items-center gap-2">
           <div className="flex gap-2 rounded-sm md:justify-center md:items-center">
             <select
-              id="filterByPrice"
+              id="filterById"
               onChange={(e) => setIdSelected(e.target.value)}
               value={idSelected}
             >
               <option value="">Exp Server Side</option>
-              {allDataResto.map((data) => (
+              {dataResto.map((data) => (
                 <option key={data.id} value={data.id}>
                   {data.id}
                 </option>
@@ -152,13 +197,14 @@ const ListOfResto = () => {
           />
 
           <FilterByPrice
-            setSelectedFilter={setSelectedFilter}
-            selectedFilter={selectedFilter}
+            setRangePriceFilter={setRangePriceFilter}
+            rangePriceFilter={rangePriceFilter}
             dataResto={dataResto}
+            handleRangePrice={handleRangePrice}
           />
           <FilterByCategory
-            setSelectedFilter={setSelectedFilter}
-            selectedFilter={selectedFilter}
+            setSelectedFilterByCategory={setSelectedFilterByCategory}
+            selectedFilterByCategory={selectedFilterByCategory}
             dataResto={dataResto}
           />
           <button onClick={handleClearFilter}>Clear All</button>
@@ -166,31 +212,25 @@ const ListOfResto = () => {
       </div>
       <div>
         <div className="grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-4 px-3 gap-3 my-2">
-          {filteredDataByOpen.length > 0
-            ? filteredDataByOpen.map((restoData) => (
-                <div key={restoData.id}>
-                  <RestoCard restoData={restoData} />
-                </div>
-              ))
-            : dataRestoBy.length > 0 && idSelected !== ""
-            ? dataRestoBy.map((restoData) => (
-                <div key={restoData.id}>
-                  <RestoCard restoData={restoData} />
-                </div>
-              ))
-            : allDataResto.slice(0, visiblieCard).map((restoData) => (
-                <div key={restoData.id}>
-                  <RestoCard restoData={restoData} />
-                </div>
-              ))}
+          {dataFilter.length <= 0 ? (
+            <div className="text-center w-full absolute">
+              <span className="text-2xl font-extrabold">Data Kosong</span>
+            </div>
+          ) : (
+            dataFilter.slice(0, visiblieCard).map((restoData) => (
+              <div key={restoData.id}>
+                <RestoCard restoData={restoData} />
+              </div>
+            ))
+          )}
         </div>
         {userLogin !== null ? (
           <Button
             onClick={() => handleLoadMore()}
             className={`${
-              filteredDataByOpen.length >= 1 ||
-              visiblieCard >= allDataResto.length ||
-              allDataResto.length <= 3
+              visiblieCard >= dataFilter.length ||
+              dataFilter.length <= 4 ||
+              !dataFilter
                 ? "hidden"
                 : ""
             }  mx-auto`}
@@ -211,7 +251,15 @@ const ListOfResto = () => {
           </Button>
         ) : (
           <Link to={"/login"}>
-            <Button className="mx-auto">
+            <Button
+              className={`${
+                visiblieCard >= dataFilter.length ||
+                dataFilter.length <= 4 ||
+                !dataFilter
+                  ? "hidden"
+                  : ""
+              }  mx-auto`}
+            >
               Load more
               <svg
                 className="-mr-1 ml-2 h-4 w-4"
