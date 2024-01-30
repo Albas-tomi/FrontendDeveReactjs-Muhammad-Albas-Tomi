@@ -7,7 +7,6 @@ const RatingStar = ({ restoData }) => {
 
   //   Max 5
   rating = Math.min(rating, 5);
-  4;
 
   //   Max star 5 -> ubah menjadi null -> buat new array -> Membuat komponen Rating.Star untuk setiap elemen array
   const stars = Array(5)

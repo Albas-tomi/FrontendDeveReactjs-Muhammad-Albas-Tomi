@@ -1,79 +1,28 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import RestoCard from "../CardReasto/RestoCard";
 import FilterByPrice from "../FilteredComponent/FilterByPrice";
 import FilterByCategory from "../FilteredComponent/FilterByCategory";
 import FilterByOpen from "../FilteredComponent/FilterByOpen";
 import { Button, Spinner } from "flowbite-react";
 import { Link } from "react-router-dom";
-
+import LoadMoreLogic from "./LoadMoreLogic";
+import PriceFilterLogic from "./PriceFilterLogic";
 const ListOfResto = () => {
   const [dataResto, setDataResto] = useState([]);
   const [dataFilter, setDataFilter] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [visiblieCard, setVisibleCard] = useState(4);
-
-  // Category
   const [selectedFilterByCategory, setSelectedFilterByCategory] = useState("");
-  // Category
-
-  // Open Resto
   const [isOpenCloseFilter, setIsOpenCloseFilter] = useState(false);
-  // Open Resto
+  const [dataRestoById, setDataRestoById] = useState([]);
+  const [idSelected, setIdSelected] = useState("");
 
-  // Filter By price
-  const [rangePriceFilter, setRangePriceFilter] = useState("");
-  const [minPrice, setMinPrice] = useState(null);
-  const [maxPrice, setMaxPrice] = useState(null);
-  // Filter By price
-
+  const logicLoadmore = LoadMoreLogic();
+  const logicPriceFilter = PriceFilterLogic();
   const userLogin = localStorage.getItem("userLogin");
 
-  //   Server Side Exp
-  const [dataRestoBy, setDataRestoBy] = useState([]);
-  const [idSelected, setIdSelected] = useState("");
-  //   Server Side Exp
-
-  const handleLoadMore = () => {
-    setVisibleCard((prevValue) => prevValue + 4);
-  };
-
-  const handleRangePrice = (data) => {
-    if (data.includes("100.00 - 200.00")) {
-      setMinPrice(100);
-      setMaxPrice(200);
-    } else if (data.includes("200.00 - 300.00")) {
-      setMinPrice(200);
-      setMaxPrice(300);
-    } else if (data.includes("300.00 - 400.00")) {
-      setMinPrice(300);
-      setMaxPrice(400);
-    } else if (data.includes("400.00 - 500.00")) {
-      setMinPrice(400);
-      setMaxPrice(500);
-    } else if (data.includes("500.00 - 600.00")) {
-      setMinPrice(500);
-      setMaxPrice(600);
-    } else if (data.includes("600.00 - 700.00")) {
-      setMinPrice(600);
-      setMaxPrice(700);
-    } else if (data.includes("700.00 - 800.00")) {
-      setMinPrice(700);
-      setMaxPrice(800);
-    } else if (data.includes("800.00 - 900.00")) {
-      setMinPrice(800);
-      setMaxPrice(900);
-    } else if (data.includes("900.00 - 1000.00")) {
-      setMinPrice(900);
-      setMaxPrice(1000);
-    } else {
-      setMinPrice(null);
-      setMaxPrice(null);
-    }
-    setRangePriceFilter(data);
-  };
-
-  const handleFilteredData = () => {
+  //#REGION_FILTEREDDATA ===========
+  const handleFilteredData = useCallback(() => {
     let dataDisplay = dataResto;
     if (isOpenCloseFilter === true) {
       dataDisplay = dataDisplay.filter(
@@ -85,21 +34,29 @@ const ListOfResto = () => {
         (data) => data.kategori === selectedFilterByCategory
       );
     }
-    if (minPrice !== null) {
+    if (logicPriceFilter.minPrice !== null) {
       dataDisplay = dataDisplay.filter(
-        (dataPrice) =>
-          parseFloat(dataPrice.price) >= minPrice &&
-          parseFloat(dataPrice.price) <= maxPrice
+        (data) =>
+          data.price >= logicPriceFilter.minPrice &&
+          data.price <= logicPriceFilter.maxPrice
       );
     }
-    if (idSelected !== "") {
-      dataDisplay = dataRestoBy;
+    if (dataRestoById.length > 0 && idSelected !== "") {
+      dataDisplay = dataRestoById;
     }
-
     setDataFilter(dataDisplay);
-  };
+  }, [
+    dataResto,
+    logicPriceFilter.maxPrice,
+    selectedFilterByCategory,
+    isOpenCloseFilter,
+    logicPriceFilter.minPrice,
+    dataRestoById,
+    idSelected,
+  ]);
+  //#END_REGION_FILTEREDDATA ===========
 
-  //   GET DATA
+  //#REGION_GETDATA ===========
   const getDataResto = async () => {
     try {
       setLoading(true);
@@ -114,14 +71,19 @@ const ListOfResto = () => {
     }
   };
 
-  //   GET DATA SERVER SIDE
-  const getDataRestoBy = async (id) => {
+  useEffect(() => {
+    getDataResto();
+  }, []);
+  //#END_REGION_GETDATA ===========
+
+  //#REGION_GET-DATA-BYID =========
+  const getDataRestoById = async (id) => {
     try {
       setLoading(true);
       const res = await axios.get(
         `https://659d6d92633f9aee7909681f.mockapi.io/restaurants/${id}`
       );
-      setDataRestoBy(Array(res.data));
+      setDataRestoById(Array(res.data));
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -129,29 +91,31 @@ const ListOfResto = () => {
     }
   };
 
-  //   GET DATA SERVER SIDE
   useEffect(() => {
-    if (idSelected !== "") getDataRestoBy(idSelected);
+    if (idSelected !== "") {
+      getDataRestoById(idSelected);
+    } else {
+      getDataResto();
+    }
   }, [idSelected]);
-  //   GET DATA SERVER SIDE
+  //#END_REGION_GET-DATA-BYID =========
 
-  useEffect(() => {
-    getDataResto();
-  }, []);
-
+  //#REGION_FILTER DATA ============
   useEffect(() => {
     handleFilteredData();
   }, [
     selectedFilterByCategory,
     isOpenCloseFilter,
     dataResto,
-    minPrice,
-    maxPrice,
+    logicPriceFilter.minPrice,
+    logicPriceFilter.maxPrice,
     idSelected,
-    rangePriceFilter,
+    logicPriceFilter.rangePriceFilter,
+    dataRestoById,
   ]);
+  //#REGION_FILTER DATA ============
 
-  // Reset All Filter
+  //#REGION_CLEAR-FILTER
   const handleClearFilter = () => {
     setSelectedFilterByCategory("");
     setIsOpenCloseFilter(false);
@@ -160,6 +124,7 @@ const ListOfResto = () => {
     setMinPrice(null);
     setMaxPrice(null);
   };
+  //#END_REGION_CLEAR-FILTER
 
   if (loading)
     return (
@@ -197,10 +162,8 @@ const ListOfResto = () => {
           />
 
           <FilterByPrice
-            setRangePriceFilter={setRangePriceFilter}
-            rangePriceFilter={rangePriceFilter}
-            dataResto={dataResto}
-            handleRangePrice={handleRangePrice}
+            rangePriceFilter={logicPriceFilter.rangePriceFilter}
+            handleRangePrice={logicPriceFilter.handleRangePrice}
           />
           <FilterByCategory
             setSelectedFilterByCategory={setSelectedFilterByCategory}
@@ -217,7 +180,7 @@ const ListOfResto = () => {
               <span className="text-2xl font-extrabold">Data Kosong</span>
             </div>
           ) : (
-            dataFilter.slice(0, visiblieCard).map((restoData) => (
+            dataFilter.slice(0, logicLoadmore.visiblieCard).map((restoData) => (
               <div key={restoData.id}>
                 <RestoCard restoData={restoData} />
               </div>
@@ -226,9 +189,9 @@ const ListOfResto = () => {
         </div>
         {userLogin !== null ? (
           <Button
-            onClick={() => handleLoadMore()}
+            onClick={() => logicLoadmore.handleLoadMore()}
             className={`${
-              visiblieCard >= dataFilter.length ||
+              logicLoadmore.visiblieCard >= dataFilter.length ||
               dataFilter.length <= 4 ||
               !dataFilter
                 ? "hidden"
